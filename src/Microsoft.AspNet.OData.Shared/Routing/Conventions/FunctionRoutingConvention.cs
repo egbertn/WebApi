@@ -3,24 +3,41 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Microsoft.AspNet.OData.Interfaces;
+using System.Net.Http;
+using System.Web.Http;
+using System.Web.Http.Controllers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
-namespace Microsoft.AspNet.OData.Routing.Conventions
+namespace System.Web.OData.Routing.Conventions
 {
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles function invocations.
     /// </summary>
-    public partial class FunctionRoutingConvention : NavigationSourceRoutingConvention
+    public class FunctionRoutingConvention : NavigationSourceRoutingConvention
     {
         /// <inheritdoc/>
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
             Justification = "These is simple conversion function based on context and OData path value and cannot be split up.")]
-        internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext,
-            IWebApiActionMap actionMap)
+        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext,
+            ILookup<string, HttpActionDescriptor> actionMap)
         {
-            if (ODataRequestMethod.Get == controllerContext.Request.Method)
+            if (odataPath == null)
+            {
+                throw Error.ArgumentNull("odataPath");
+            }
+
+            if (controllerContext == null)
+            {
+                throw Error.ArgumentNull("controllerContext");
+            }
+
+            if (actionMap == null)
+            {
+                throw Error.ArgumentNull("actionMap");
+            }
+
+            if (controllerContext.Request.Method == HttpMethod.Get)
             {
                 string actionName = null;
                 OperationSegment function = null;
